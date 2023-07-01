@@ -10,7 +10,7 @@ $(document).ready( () => {
                 let data = '';
                 res.forEach(element => {
                     data+= `
-                        <tr alumnoId = ${element.id} >
+                        <tr personaId = ${element.id} >
                             <td>${element.id}</td>
                             <td>${element.nombre}</td>
                             <td>${element.apellidoPaterno}</td>
@@ -18,22 +18,12 @@ $(document).ready( () => {
                             <td>${element.identificacion}</td>
 
                             <td>
-                                <button id="btn-details" class="btn btn-warning">Detalles</button>
-                            </td>
-
-                            <td>
                                 <button id="btn-delete" class="btn btn-danger">Eliminar</button>
-                            </td>
-
-                            <td>
-                                <button id="btn-edit" class="btn btn-success">Editar</button>
                             </td>
 
                         </tr>
                     `
-
                 });
-
                 $('#tbody').html(data);
 
             }
@@ -41,41 +31,47 @@ $(document).ready( () => {
 
     }
 
-    //Guardar alumno
-    const save = () => {
-        $('#agregar').on('click', function(){
-            const datosAlumno = {
-                nombre: $('#nombre').val(),
-                apellidoPaterno: $('#apellidos').val(),
-                apellidoMaterno: $('#curso').val(),
-                identificacion: $('#nota').val()
+    //Guardar Persona
+const save = () => {
+    $('#agregar').on('click', function(){
+        const nombre = $('#nombre').val();
+        const apellidoPaterno = $('#apellidoPaterno').val();
+        const identificacion = $('#identificacion').val();
+
+        if (nombre && apellidoPaterno && identificacion) {
+            const datosPersona = {
+                nombre: nombre,
+                apellidoPaterno: apellidoPaterno,
+                apellidoMaterno: $('#apellidoMaterno').val(),
+                identificacion: identificacion
             }
 
             $.ajax({
                 url: 'http://localhost:8080/directorio/save',
                 contentType: 'application/json',
                 type: 'POST',
-                data:JSON.stringify(datosAlumno),
+                data: JSON.stringify(datosPersona),
                 dataType: 'json',
                 success: (data) => {
-                    $('#messages').html('Alumno creado').css('display','block')
+                    $('#messages').html('Persona creada').css('display', 'block');
                     list();
                     reset();
-                    console.log('Alumno registrado!');
-
+                    console.log('Persona registrada!');
                 }
+            });
+        } else {
+            // Mostrar un mensaje de error o realizar alguna acción cuando los campos requeridos no están completos
+            alert('Por favor, complete todos los campos requeridos.Nota: Solo apellido Materno es opcional');
+        }
+    });
+}
 
-            })
 
-
-        })
-    }
-
-//Rellenar los datos del alumno en el formualario
+//Rellenar los datos de la persona en el formualario
 const rellenarAlumno = () => {
     $(document).on('click', '#btn-edit', function(){
         let btnEdit= $(this)[0].parentElement.parentElement;
-        let identificacion = $(btnEdit).attr('alumnoId');
+        let identificacion = $(btnEdit).attr('identificacion');
 
        $('#agregar').hide();
        $('#editar').show();
@@ -87,9 +83,9 @@ const rellenarAlumno = () => {
            success:  (res) => {
                $('#id').val(res.id);
                $('#nombre').val(res.nombre);
-               $('#apellidos').val(res.apellidoPaterno);
-               $('#curso').val(res.apellidoMaterno);
-               $('#nota').val(res.identificacion);
+               $('#apellidoPaterno').val(res.apellidoPaterno);
+               $('#apellidoMaterno').val(res.apellidoMaterno);
+               $('#identificacion').val(res.identificacion);
 
            }
        })
@@ -99,57 +95,18 @@ const rellenarAlumno = () => {
 
 }
 
-//Método para modificar los datos de los alumnos
-const editAlumno = () => {
-    $('#editar').on('click', function(){
-        let id = $('#id').val();
-        $('#agregar').css('display', 'none');
-        $('#editar').css('display', 'block');
-
-        const datosAlumno = {
-            nombre: $('#nombre').val(),
-            apellidos: $('#apellidos').val(),
-            curso: $('#curso').val(),
-            nota: $('#nota').val()
-        }
-
-        $.ajax({
-            url: 'http://localhost:8080/api/update/' + id,
-            contentType: 'application/json',
-            type: 'PUT',
-            data:JSON.stringify(datosAlumno),
-            dataType: 'json',
-            success:  (res) => {
-                $('#messages').html('Alumno modificado').css('display','block')
-                $('#editar').css('display', 'none');
-                $('#agregar').css('display','block');
-
-                reset();
-                list();
-            }
-
-        })
-    })
-
-}
-
-
 
 //Método para limpiar el formulario
 const reset = () => {
     $('#nombre').val('');
-    $('#apellidos').val('');
-    $('#curso').val('');
-    $('#nota').val('');
+    $('#apellidoPaterno').val('');
+    $('#apellidoMaterno').val('');
+    $('#identificacion').val('');
 }
 
 
 //LLamadas a funciones
 list();
 save();
-details();
-deleteAlumno();
 rellenarAlumno();
-editAlumno();
-
 })
